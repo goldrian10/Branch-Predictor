@@ -76,13 +76,65 @@ int algoritmo_bimodal(int bht[][2], char *estado_prueba, char *estado_predecido,
 	return bht[apuntador_matriz][0];
 }//
 
+void indexacion(int entries,int index, /*quitar prueba*/int prueba ,int bht[][2], int *estados, char *estado_prueba){
+	
+	int contador_estado=0, apuntador_matriz=0, contador_tabla=0;
+	char estado_predecido[] = "N";
+	
+	for(apuntador_matriz=0; apuntador_matriz <= entries; apuntador_matriz++){
+		
+		
+		if(apuntador_matriz==entries){
+			prueba++;
+			bht[contador_tabla][1]=index;
+			contador_estado=0;
+			
+			algoritmo_bimodal(bht, estado_prueba, estado_predecido, apuntador_matriz, contador_estado, (int*)estados);
+			contador_tabla++;
+			if (contador_tabla> entries){
+				contador_tabla=0;
+			}
+			break;
+		}
+		
+		if(bht[apuntador_matriz][1] == index){
+			prueba++;
+			//printf("se encontro\n contador bht:%d\n",bht[apuntador_matriz][0]);
+			
+			for(contador_estado=0; contador_estado<4;contador_estado++){
+				if(estados[contador_estado] == bht[apuntador_matriz][0]){
+					break;
+				}
+				
+			}
+			
+			algoritmo_bimodal(bht, estado_prueba, estado_predecido, apuntador_matriz, contador_estado, (int*)estados);
+			
+			break;
+		}//fin del if
+		
+		else if(bht[apuntador_matriz][1]==0){
+			prueba++;
+			bht[apuntador_matriz][1]=index;
+			contador_estado=0;																
+			algoritmo_bimodal(bht, estado_prueba, estado_predecido, apuntador_matriz, contador_estado, (int*)estados);
+
+			break;	
+		}
+		
+		
+	}//fin for
+}//fin de indexacion
+
+
+
  void dos_bits(int bht[][2], int entries, int n, int *estados){
 
-	 char estado_predecido[] = "N";
+
 	 char estado_prueba[] = "T";
-	 int contador_estado=0;
+	 
 	 char *index;
-	 int prueba =0, contador_tabla=0;
+	 int prueba =0;
 	/////////////////////////////////////////// 	
 	//llenar bht
 	//inicializamos todas en SN y las de indice en 0
@@ -102,7 +154,10 @@ int algoritmo_bimodal(int bht[][2], char *estado_prueba, char *estado_predecido,
 		index = indice(1 ,n,estado_prueba);
 		uint index_int=atoi(index);
 		//printf("pc_bits; %u", index_int);
-		for(apuntador_matriz=0; apuntador_matriz <= entries; apuntador_matriz++){
+		
+		
+		indexacion(entries, index_int,/*quitar prueba*/ prueba,bht,(int*)estados, estado_prueba);
+		/*for(apuntador_matriz=0; apuntador_matriz <= entries; apuntador_matriz++){
 			
 			
 			if(apuntador_matriz==entries){
@@ -144,7 +199,7 @@ int algoritmo_bimodal(int bht[][2], char *estado_prueba, char *estado_predecido,
 			}
 			
 			
-		}//fin for
+		}//fin for  */
 			
 		
 	}//fin while
