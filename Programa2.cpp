@@ -230,10 +230,11 @@ void gshare(int bht[][2], int gbits, int entries, int n, int *estados){
 	while(!feof(stdin)){
 		apuntador_matriz=0;
 		pc_bits = indice(2, n, estado_prueba);
-		uint pc_bits_int=atoi(pc_bits);
-		printf("pcbits: %u\n",pc_bits_int);
+		uint pc_bits_uint=atoi(pc_bits);
+		int pc_bits_int = (int) pc_bits_uint;
+		printf("pcbits: %u  %d\n",pc_bits_uint, pc_bits_int);
 		index = pc_bits_int ^ ghist;
-		printf("index: %u\n",index);
+		printf("index: %d\n",index);
 		
 		
 		
