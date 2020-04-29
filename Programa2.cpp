@@ -76,7 +76,7 @@ int algoritmo_bimodal(int bht[][2], char *estado_prueba, char *estado_predecido,
 	return bht[apuntador_matriz][0];
 }//
 
-void indexacion(int entries,int index, /*quitar prueba*/int prueba ,int bht[][2], int *estados, char *estado_prueba){
+void indexacion(int entries,int index,int bht[][2], int *estados, char *estado_prueba){
 	
 	int contador_estado=0, apuntador_matriz=0, contador_tabla=0;
 	char estado_predecido[] = "N";
@@ -85,7 +85,6 @@ void indexacion(int entries,int index, /*quitar prueba*/int prueba ,int bht[][2]
 		
 		
 		if(apuntador_matriz==entries){
-			prueba++;
 			bht[contador_tabla][1]=index;
 			contador_estado=0;
 			
@@ -98,7 +97,6 @@ void indexacion(int entries,int index, /*quitar prueba*/int prueba ,int bht[][2]
 		}
 		
 		if(bht[apuntador_matriz][1] == index){
-			prueba++;
 			//printf("se encontro\n contador bht:%d\n",bht[apuntador_matriz][0]);
 			
 			for(contador_estado=0; contador_estado<4;contador_estado++){
@@ -114,7 +112,6 @@ void indexacion(int entries,int index, /*quitar prueba*/int prueba ,int bht[][2]
 		}//fin del if
 		
 		else if(bht[apuntador_matriz][1]==0){
-			prueba++;
 			bht[apuntador_matriz][1]=index;
 			contador_estado=0;																
 			algoritmo_bimodal(bht, estado_prueba, estado_predecido, apuntador_matriz, contador_estado, (int*)estados);
@@ -134,7 +131,7 @@ void indexacion(int entries,int index, /*quitar prueba*/int prueba ,int bht[][2]
 	 char estado_prueba[] = "T";
 	 
 	 char *index;
-	 int prueba =0;
+
 	/////////////////////////////////////////// 	
 	//llenar bht
 	//inicializamos todas en SN y las de indice en 0
@@ -156,7 +153,7 @@ void indexacion(int entries,int index, /*quitar prueba*/int prueba ,int bht[][2]
 		//printf("pc_bits; %u", index_int);
 		
 		
-		indexacion(entries, index_int,/*quitar prueba*/ prueba,bht,(int*)estados, estado_prueba);
+		indexacion(entries, index_int,bht,(int*)estados, estado_prueba);
 		/*for(apuntador_matriz=0; apuntador_matriz <= entries; apuntador_matriz++){
 			
 			
@@ -205,15 +202,15 @@ void indexacion(int entries,int index, /*quitar prueba*/int prueba ,int bht[][2]
 	}//fin while
 	
 		
-	 printf("\n%d\n",prueba);
 	
 }//fin dos bits
 
 
 void gshare(int bht[][2], int gbits, int entries, int n, int *estados){
-	int ghist=0;
+	uint ghist=0;
 	int apuntador_matriz=0;
-	char *index, *pc_bits;
+	uint index=0;
+	char *pc_bits;
 	char estado_predecido[] = "N";
 	char estado_prueba[] = "T";
 	
@@ -230,11 +227,10 @@ void gshare(int bht[][2], int gbits, int entries, int n, int *estados){
 	while(!feof(stdin)){
 		apuntador_matriz=0;
 		pc_bits = indice(2, n, estado_prueba);
-		uint pc_bits_uint=atoi(pc_bits);
-		int pc_bits_int = (int) pc_bits_uint;
-		printf("pcbits: %u  %d\n",pc_bits_uint, pc_bits_int);
+		uint pc_bits_int=atoi(pc_bits);
+		printf("pcbits: %u \n",pc_bits_int);
 		index = pc_bits_int ^ ghist;
-		printf("index: %d\n",index);
+		printf("index: %u\n",index);
 		
 		
 		
@@ -275,8 +271,8 @@ int main (int argc, char** argv){
     
 
 	
-	//dos_bits(bht, entries, n, (int*)estados);
-	gshare(bht, gl, entries, n, (int*)estados);
+	dos_bits(bht, entries, n, (int*)estados);
+	//gshare(bht, gl, entries, n, (int*)estados);
 	
 	return 0;
 }//fin del main
