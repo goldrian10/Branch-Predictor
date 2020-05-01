@@ -9,7 +9,8 @@
 
 
 
-
+// este metodo recibe  como parametro una varable tipo char, esto es en realidad para devolver el valor de estado prueba por ahí
+//la funcion es tipo char y devuelve el pc completo en forma de int
 char *indice(char *estado_prueba){
 	 
     static char pc_number [50], index[50];
@@ -29,58 +30,14 @@ char *indice(char *estado_prueba){
 }
 
 
-
-int algoritmo_bimodal(int bht[][2], char *estado_prueba, char *estado_predecido, int apuntador_matriz, int contador_estado, int *estados, float &test, float &taken_predict){
-	if(bht[apuntador_matriz][0]>1){
-		strcpy(estado_predecido ,"T");
-	}
-	else{
-		strcpy(estado_predecido ,"N");
-	}
-	//printf("Estado prueba %s\n",estado_prueba);
-	//printf("Estado predecido %s\n",estado_predecido);
-
-	if(strcmp(estado_predecido, estado_prueba)==0){//if estado predecido == estado prueba
-		//la funcion strcmp compara los strings y devuelve un 0 si son iguales
-		test++;
-		if(estados[contador_estado]>1){
-		contador_estado++;
-		taken_predict++;
-			
-		}
-		else{
-		 contador_estado--;
-		}
-		
-	}
-	else{//estado predecido != estado_prueba
-		if(estados[contador_estado]>1){
-			contador_estado--;
-		}
-		else{
-			contador_estado++;
-		}
-		
-	 
-	}
-	if(contador_estado > 3){
-		contador_estado = 3;
-	}
-	else if(contador_estado < 0){
-		contador_estado = 0;
-	}
-	bht[apuntador_matriz][0]=estados[contador_estado];
-	return bht[apuntador_matriz][0];
-}//
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+//la funcion indexacion sirve para colocar el valor del pc en la tabla bht, esto con un apuntador llamado apuntador_matriz y lo devuelve en el indice correcto
+//ademas recibe una variable de control por si se desea obtener el estado del contador de 2 bits en este indice
+//tambien esta funcion recibe y modifica el valor de contador tabla que este se utiliza para actualizar la tabla bht cuando esta se llena
+//al llenarse se va al inicio de la tabla y se remplaza este indice por el nuevo pc
 
 void indexacion(int control, int entries,int index,int bht[][2], int *estados,int &contador_tabla, int &apuntador_matriz,int &contador_estado){
 	
-	
+	//se recorre la bht y al encontrarse el indice se sale del for con el valor de apuntador_matriz donde se requiere
 	for(apuntador_matriz=0; apuntador_matriz <= entries; apuntador_matriz++){
 		
 		
@@ -97,7 +54,6 @@ void indexacion(int control, int entries,int index,int bht[][2], int *estados,in
 		}
 		
 		if(bht[apuntador_matriz][1] == index){
-		//	printf("se encontro el indice\n contador bht:%d\n",bht[apuntador_matriz][0]);
 			
 			if(control==1){
 				for(contador_estado=0; contador_estado<4;contador_estado++){
@@ -115,7 +71,7 @@ void indexacion(int control, int entries,int index,int bht[][2], int *estados,in
 			}
 			break;
 		}
-		
+		//si se encuentra un 0 quiere decir que no encontró el pc actual y se procede a guardarlo en este valor
 		else if(bht[apuntador_matriz][1]==0){
 		//	printf("se encontro un 0 en la tabla\n contador bht:%d\n",bht[apuntador_matriz][0]);
 			bht[apuntador_matriz][1]=index;
@@ -136,23 +92,81 @@ void indexacion(int control, int entries,int index,int bht[][2], int *estados,in
 }//fin de indexacion
 
 
+
+//algoritmo bimodal es la funcion encargada de realizar la comparacion entre la prediccion y el valor del outcome
+//esta recibe 2 variables nuevas por parametros que son test y taken_predict estos se actualizan cuando hay una prediccion correcta y cuando el outcome es un taken respectivamente
+//ademas actualiza los valores de estado_prueba y estado_predecido para tener informacion de estos en los metodos de los predictores
+//esta funcion actualiza el valor del estado del 2bc en este indice
+void algoritmo_bimodal(int bht[][2], char *estado_prueba, char *estado_predecido, int apuntador_matriz, int contador_estado, int *estados, float &test, float &taken_predict){
+	
+	if(bht[apuntador_matriz][0]>1){
+		strcpy(estado_predecido ,"T");
+	}
+	else{
+		strcpy(estado_predecido ,"N");
+	}
+	
+	if(strcmp(estado_predecido, estado_prueba)==0){//if estado predecido == estado prueba
+		//la funcion strcmp compara los strings y devuelve un 0 si son iguales
+		test++;
+		//si contador estado es mayor a 1 significa que la prediccion era taken entoncrs se aumenta contador estado
+		if(estados[contador_estado]>1){
+		contador_estado++;
+		taken_predict++;
+			
+		}
+		else{
+		 contador_estado--;
+		}
+		
+	}
+	else{//estado predecido != estado_prueba
+		if(estados[contador_estado]>1){
+			contador_estado--;
+		}
+		else{
+			contador_estado++;
+		}
+		
+	 
+	}
+	
+	//aqui se evita que el contador sea mayor a 3 (ST) o menos a 0 (SN)
+	if(contador_estado > 3){
+		contador_estado = 3;
+	}
+	else if(contador_estado < 0){
+		contador_estado = 0;
+	}
+	bht[apuntador_matriz][0]=estados[contador_estado];
+	//return bht[apuntador_matriz][0];
+}//
+
+
+
+//la funcion simOut es la que va a guardar los valores requeridos en el archivo de texto
+//recibe como parametros fp que es el puntero de tipo FILE, y pc, outcome, predition son los valores de pc_bits, estado_prueba y estado_prediccion 
+//estado nos dice si la prediccion fue correcta o incorrecta en este indice
 void simOut(FILE *fp , char *pc, char *outcome, char *prediction,char *estado){
 	
 	
-	        
+	//nos aseguramos de que fp exista
 	if (fp==NULL) {fputs ("File error\n",stderr); exit (1);}
 	fprintf(fp,"%s      %s              %s        %s\n",pc,outcome,prediction,estado);
 	
 }
 
 
-
- void dos_bits(int bht[][2], int entries, int n, int *estados,float &taken, float &prueba, float &taken_predict, float &test, int o){
+// la funcion dos bits es la que se ejecuta cuando el usuario digita un 0 en la seccion de prediction type
+//esta recibe la tabla bht donde va a guardar los indices y estados de los 2bc, n que es el tamaño de bits que se necesitan para indexar
+//entries que es el numero de entradas del bht
+//estados que es el resultado del enum del estado del 2bc y o que me dice si requiero escribir el archivo de texto
+ void dos_bits(FILE *fp,int bht[][2], int entries, int n, int *estados,float &taken, float &prueba, float &taken_predict, float &test, int o){
 	char estado_predecido[] = "N";
 	char estado_prueba[] = "T";
-	FILE *fp;
-	fp = fopen ( "Bimodal.txt", "wt" );
-	fprintf(fp, "PC           Outcome      Prediction   correct/incorrect\n");
+	
+	
+	
 	static char cadena_indice[50], index_str[50];
 	//char *index;
 	int apuntador_matriz=0, contador_tabla=0,contador_estado=0,contadorB=0;
@@ -169,8 +183,9 @@ void simOut(FILE *fp , char *pc, char *outcome, char *prediction,char *estado){
 	}
 	////////////// 
 	
-	
+	//ciclo principal de la funcion, se termina donde se acaba el archivo 
 	while(!feof(stdin)){
+		//este contador se utiliza para saber si la prediccion fue correcta
 		contadorB++;
 		apuntador_matriz=0;
 		pc_bits = indice(estado_prueba);
@@ -178,7 +193,7 @@ void simOut(FILE *fp , char *pc, char *outcome, char *prediction,char *estado){
 
 		sprintf(index_str, "%u", pc_bits_int);
 		
-		
+		//aqui se modifica el tamaño del pc para tomar solo los nbits menos significativos y se guardan en index_int
 		int contador=0, indexBits;
 		int stringLen = strlen(index_str);
 		indexBits = stringLen-n;
@@ -191,16 +206,19 @@ void simOut(FILE *fp , char *pc, char *outcome, char *prediction,char *estado){
 		}
 		uint index_int=atoi(cadena_indice);
 		
+		//se compara si mi outcome fue taken para aumentar su respectivo contador
 		if(strcmp(estado_prueba,"T")==0){
 			taken++;
 		}
-		
+		//se procede a indexar y ejecutar los algoritmos para saber entrenar el predictor
 		indexacion(1,entries,index_int,bht,(int*)estados,contador_tabla, apuntador_matriz, contador_estado);
 		
 		algoritmo_bimodal(bht, estado_prueba, estado_predecido, apuntador_matriz, contador_estado, (int*)estados, test,taken_predict);
 		
 		prueba++;
-		if(prueba<=500){
+		
+		//se compara si o está en 1 para saber si se debe escribir el archivo de texto y ademas que se termine a las 500 lineas
+		if(o==1 && prueba<=500){
 			if(contadorB==test){strcpy(estado ,"Correcto");}
 			else{strcpy(estado ,"Incorrecto");
 				contadorB--;}
@@ -208,26 +226,33 @@ void simOut(FILE *fp , char *pc, char *outcome, char *prediction,char *estado){
 		}
 		
 		
-	}//fin while
-	fclose ( fp );
+	}
+	
+	//se cierra el archivo de texto
+	if(o==1){fclose ( fp );}
 		
 	
-}//fin dos bits
+}
 
 
 
+// la funcion gshare es la que se ejecuta cuando el usuario digita un 1 en la seccion de prediction type
+//esta recibe la tabla bht donde va a guardar los indices y estados de los 2bc, n que es el tamaño de bits que se necesitan para indexar
+//gbits que es el tamaño del registro de historia
+//entries que es el numero de entradas del bht
+//estados que es el resultado del enum del estado del 2bc y o que me dice si requiero escribir el archivo de texto
 
-void gshare(int bht[][2], int gbits, int entries, int n, int *estados, float &taken, float &prueba, float &taken_predict, float &test,int o){
+void gshare(FILE *fp,int bht[][2], int gbits, int entries, int n, int *estados, float &taken, float &prueba, float &taken_predict, float &test,int o){
 	uint ghist=0;
 	static char cadena_indice[50], index_str[50], estado[50];
 	int apuntador_matriz=0, contador_tabla=0,contador_estado=0, contadorG=0,contadorB=0;
 	uint index=0;
 	char *pc_bits;
-	FILE *fp;
-	fp = fopen ( "Gshare.txt", "wt" );
-	fprintf(fp, "PC           Outcome      Prediction   correct/incorrect\n");
+
 	char estado_prueba[] = "T";
 	char estado_predecido[] = "N";
+	
+	//se crea una mascara de tamaño 2^gbits -1 para asegurarse que nunca hayan más digitos que gbits
 	uint mask= pow(2,gbits)-1;
 	
 	/////////////////////////////////////////// 	
@@ -237,23 +262,28 @@ void gshare(int bht[][2], int gbits, int entries, int n, int *estados, float &ta
 	for(apuntador_matriz=0; apuntador_matriz < entries; apuntador_matriz++){
 		bht[apuntador_matriz][0]=0;
 		bht[apuntador_matriz][1]=0;
-		//printf("%d\n",bht[apuntador_matriz][1]);
 	}
 	
+	
+	//ciclo principal de la funcion, se termina donde se acaba el archivo 
 	while(!feof(stdin)){
+		//estos contadores se utilizan el G para saber si el outcome fue taken y modiificar la historia
+		//y el contadorB para saber si la prediccion fue correcta
 		contadorG++;
 		contadorB++;
 		apuntador_matriz=0;
 		
+		//se transforman los pc bits a un int sin signo y se hace xor con la historia (antes inicializada en  0)
 		pc_bits = indice(estado_prueba);
 		uint pc_bits_int=atoi(pc_bits);
-		//printf("pcbits: %u \n",pc_bits_int);
+		
+		//compruebo que ghist no sea mayor a gbits
 		ghist=ghist&mask;
 		index = pc_bits_int ^ ghist;
 		
 		sprintf(index_str, "%u", index);
 		
-		
+		//con este algoritmo se obtienen los bit menos significativos requeridos
 		int contador=0, indexBits;
 		int stringLen = strlen(index_str);
 		indexBits = stringLen-n;
@@ -264,29 +294,35 @@ void gshare(int bht[][2], int gbits, int entries, int n, int *estados, float &ta
 			cadena_indice[contador]=index_str[i];
 			contador++;
 		}
+		
 		uint index_int=atoi(cadena_indice);
-		//printf("index: %u\n",index_int);
+	
+	
+		//se compara si mi outcome fue taken para aumentar su respectivo contador
 		if(strcmp(estado_prueba,"T")==0){
 			taken++;
 		}
 		
 		indexacion(1,entries, index_int,bht,(int*)estados,contador_tabla, apuntador_matriz, contador_estado);
 		algoritmo_bimodal(bht, estado_prueba, estado_predecido, apuntador_matriz, contador_estado, (int*)estados, test,taken_predict);
+		
+		//se le hace shift a la historia global para actualizarla
 		ghist=ghist<<1;
+		//si fue taken se le suma 1 y si no se deja en 0
 		if(taken==contadorG){
 				//taken
-				//printf("correct\n");
 				ghist=ghist+1;
 		}
 		else{
 			//not taken
-				//printf("incorrect\n");	
 				contadorG--;		
 		}
-		//printf("test: %d\ncontad: %d \n", test, contadorG);
+	
 		
 		prueba++;
-		if(prueba<=500){
+		
+		//se compara si o está en 1 para saber si se debe escribir el archivo de texto y ademas que se termine a las 500 lineas
+		if(o==1 && prueba<=500){
 			if(contadorB==test){strcpy(estado ,"Correcto");}
 			else{strcpy(estado ,"Incorrecto");
 				contadorB--;}
@@ -294,8 +330,10 @@ void gshare(int bht[][2], int gbits, int entries, int n, int *estados, float &ta
 		}
 		
 		
-	}//fin while
-	fclose ( fp );
+	}
+	
+	//se cierra el archivo de texto
+	if(o==1){fclose ( fp );}
 		
 	}//fin gshare
 
@@ -307,7 +345,13 @@ void gshare(int bht[][2], int gbits, int entries, int n, int *estados, float &ta
 
 
 
-void pshare(int bht[][2],int entries, int pbits, int n,int *estados, float &taken, float &prueba, float &taken_predict, float &test,int o){
+// la funcion Pshare es la que se ejecuta cuando el usuario digita un 1 en la seccion de prediction type
+//esta recibe la tabla bht donde va a guardar los indices y estados de los 2bc, n que es el tamaño de bits que se necesitan para indexar
+//pbits que es el tamaño del registro de historia privada
+//entries que es el numero de entradas del bht
+//estados que es el resultado del enum del estado del 2bc y o que me dice si requiero escribir el archivo de texto
+
+void pshare(FILE *fp,int bht[][2],int entries, int pbits, int n,int *estados, float &taken, float &prueba, float &taken_predict, float &test,int o){
 	//se crea una matriz 2^s x 2 para usarla de pht
 	int pht[entries][2];
 	//se inicializan el resto de variables a utilizar
@@ -316,9 +360,7 @@ void pshare(int bht[][2],int entries, int pbits, int n,int *estados, float &take
 	static char cadena_indice[50], index_str[50], estado[50];
 	char estado_predecido[] = "N";
 	char estado_prueba[] = "T";
-	FILE *fp;
-	fp = fopen ( "Pshare.txt", "wt" );
-	fprintf(fp, "PC           Outcome      Prediction   correct/incorrect\n");
+
 	int apuntador_matriz=0, contador_tabla=0,contador_estado=0, contadorP=0, contador=0, indexBits=0, stringLen=0,contadorB=0;
 	uint index_int=0;
 
@@ -357,7 +399,7 @@ void pshare(int bht[][2],int entries, int pbits, int n,int *estados, float &take
 			indexBits=0;
 		}
 		for(int i= indexBits; i<= stringLen; i++){
-			cadena_indice[contador]=index_str[i];
+			cadena_indice[contador]=pc_bits[i];
 			contador++;
 		}
 		uint pc_bits_int=atoi(pc_bits);
@@ -419,7 +461,7 @@ void pshare(int bht[][2],int entries, int pbits, int n,int *estados, float &take
 		
 		prueba++;
 		
-		if(prueba<=500){
+		if(o==1 && prueba<=500){
 			if(contadorB==test){strcpy(estado ,"Correcto");}
 			else{strcpy(estado ,"Incorrecto");
 				contadorB--;}
@@ -427,49 +469,17 @@ void pshare(int bht[][2],int entries, int pbits, int n,int *estados, float &take
 		}
 		
 		
-	}//fin while
-	fclose ( fp );
-		
-		//printf("pruebas: %d\nCorrectos: %d\n",prueba, test);
-		
-	
-	
-	
-}//fin pshare
-
-
-/*void torneo(){
-	int apuntador_matriz=0;
-	
-	int tht[entries][2];
-	
-	//llenar tht
-	//inicializamos todas en 0
-	
-	for(apuntador_matriz=0; apuntador_matriz < entries; apuntador_matriz++){
-		pht[apuntador_matriz][0]=0;
-		pht[apuntador_matriz][1]=0;
-		
 	}
-	
-	
-	while(!feof(stdin)){
-		
-		
-		gshare(bht, gh, entries, n, (int*)estados);
-		
-		pshare(bht,entries, ph, n, (int*)estados);
-		
-		
-	}//fin while
-	
-	
-}//fin torneo*/
+	if(o==1){fclose ( fp );}
+
+}
+
 
 
 
 
 int main (int argc, char** argv){
+	//enum utilizado para tener mas control sobre los estados del 2bc
 	enum bimodal { SN=0, WN, WT, ST};
 	enum bimodal estados[] ={SN,WN,WT,ST};
 	float taken=0, prueba=0, test=0, taken_predict=0;
@@ -479,6 +489,8 @@ int main (int argc, char** argv){
 	//argv[8]= P history register size
 	//argv[10b]= simulation out
 	enum argumentos {s=2,type=4, gSize=6, pSize=8, simOut=10};
+	//se inicializa el puntero tipo FILE que va al archivo 
+	FILE *fp=NULL;
 	
 
 	static char tipo[50];
@@ -488,6 +500,7 @@ int main (int argc, char** argv){
 	int ph = strtoq(argv[pSize], &r, 10);
 	int bpt = strtoq(argv[type], &x, 10);
 	int o = strtoq(argv[simOut], &f, 10);
+	//entradas del BHT = 2 ^n
     int entries = pow (2,n);
     
     //creacion del branch history table
@@ -495,16 +508,35 @@ int main (int argc, char** argv){
     
 	switch(bpt){
 	case 0:
-		dos_bits(bht, entries, n, (int*)estados, taken, prueba, taken_predict, test,o);
 		strcpy(tipo ,"Bimodal");
+		//si o esta activo se crea, se pone el nombre del archivo y el encabezado
+		if(o==1){
+			fp = fopen ( "Bimodal.txt", "wt" );
+			fprintf(fp, "PC           Outcome      Prediction   correct/incorrect\n");
+		}
+		
+		dos_bits(fp,bht, entries, n, (int*)estados, taken, prueba, taken_predict, test,o);
+
 		break;
 	case 1:
-		gshare(bht, gh, entries, n, (int*)estados, taken, prueba, taken_predict, test,o);
 		strcpy(tipo ,"Gshare");
+		if(o==1){
+			fp = fopen ( "Gshare.txt", "wt" );
+			fprintf(fp, "PC           Outcome      Prediction   correct/incorrect\n");
+		}
+		
+		gshare(fp,bht, gh, entries, n, (int*)estados, taken, prueba, taken_predict, test,o);
+
 		break;
 	case 2:
-		pshare(bht,entries, ph, n, (int*)estados, taken, prueba, taken_predict, test,o);
 		strcpy(tipo ,"Pshare");
+		if(o==1){
+			fp = fopen ( "Pshare.txt", "wt" );
+			fprintf(fp, "PC           Outcome      Prediction   correct/incorrect\n");
+		}
+		
+		pshare(fp,bht,entries, ph, n, (int*)estados, taken, prueba, taken_predict, test,o);
+		
 		break;
 	case 3:
 		
@@ -512,7 +544,7 @@ int main (int argc, char** argv){
 	}
 	
 	printf("_______________________________________________________________________________\n Prediction parameters:\n_______________________________________________________________________________\n Branch prediction type:                                %s\n BHT size (entries):                                    %d\n Global history register size:                          %d\n Private history register size:                         %d\n",tipo ,n,gh,ph);
-	printf("_______________________________________________________________________________\n Simulation results:\n_______________________________________________________________________________\n Number of branch:                                     %f\n Number of correct prediction of taken branches:        %f\n Number of incorrect prediction of taken branches:      %f\n Correct prediction of not taken branches:              %f\n Incorrect prediction of not taken branches:            %f\n Percentage of correct predictions:                   %f%c\n_______________________________________________________________________________\n",round(prueba),taken_predict,(taken-taken_predict),(test-taken_predict),((prueba-taken)-(taken_predict-test)),((test*100)/prueba),'%');
+	printf("_______________________________________________________________________________\n Simulation results:\n_______________________________________________________________________________\n Number of branch:                                     %f\n Number of correct prediction of taken branches:        %f\n Number of incorrect prediction of taken branches:      %f\n Correct prediction of not taken branches:              %f\n Incorrect prediction of not taken branches:            %f\n Percentage of correct predictions:                   %f%c\n_______________________________________________________________________________\n",prueba,taken_predict,(taken-taken_predict),(test-taken_predict),((prueba-taken)-(test-taken_predict)),((test*100)/prueba),'%');
 
 																																																																																																																					//prueba = cantidad de branches 
 																																																																																																																					//test = cantidad de correctos
