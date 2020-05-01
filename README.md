@@ -32,6 +32,8 @@ gunzip -c branch-trace-gcc.trace.gz|./tarea2 -s<#>-bp<#>-gh<#>-ph<#>-o<#>
 
 -ph es el tamaño de la historia privada
 
+-o si esta opcion tiene un 1 creará un archivo de texto con la informacion de los primeros 500 saltos
+
 ### Desinstalar
 para desinstalar escriba el siguiente comando en su consola
 ```
