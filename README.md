@@ -1,7 +1,5 @@
 # Tarea2
 
-Se utilizó C/C++ para la elaboracion de la tarea
-
 ## Empezar
 clonar este repositorio:
  ```
